@@ -1,10 +1,11 @@
 #!/bin/bash
-#install requirements
+
+# Install requirements
 sudo apt update
 sudo apt install -y nginx
 curl -sSL https://get.docker.com | sh
 
-#docker login
+# Docker login
 DOCKER_USERNAME='evitey'
 DOCKER_PASSWORD='$t@rt2023!'
 echo "$DOCKER_PASSWORD" | sudo docker login --username "$DOCKER_USERNAME" --password-stdin
@@ -28,7 +29,7 @@ sudo docker pull evitey/evitey-demo:evitey_sql_new
 cd /app/hosting/evitey/mysql
 sudo touch ./taskman.cnf
 sudo chmod +x ./taskman.cnf
-sudo chown evitey-trail:evitey-trail ./taskman.cnf
+sudo chown evitey-test-01:evitey-test-01 ./taskman.cnf
 cat << EOF > ./taskman.cnf
 [mysqld]
 character-set-server=utf8
@@ -37,11 +38,6 @@ innodb_buffer_pool_size = 1G
 innodb_log_file_size = 256M
 innodb_flush_log_at_trx_commit = 1
 innodb_flush_method = O_DIRECT
-
-#slow-query-log=1
-#slow-query-log-file=/var/log/mysql/mysql-slow.log
-#long_query_time=.5
-#log-queries-not-using-indexes = 1
 
 sql_mode='STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION'
 
@@ -63,11 +59,11 @@ sudo docker run --restart=always -it \
 -e MYSQL_PASSWORD=resources \
 -v /app/hosting/evitey/storage/rmmysql:/var/lib/mysql \
 -v /app/hosting/evitey/mysql/taskman.cnf:/etc/mysql/conf.d/taskman.cnf \
---name mysql -dp  127.0.0.1:3306:3306 evitey/evitey-demo:evitey_sql_new
+--name mysql -dp 127.0.0.1:3306:3306 evitey/evitey-demo:evitey_sql_new
 sudo docker network connect deployment_default mysql
 
 sleep 10
-sudo docker run \
+timeout 2m sudo docker run \
  --network deployment_default \
  -e MYSQL_HOST=mysql \
  -e MYSQL_PORT=3306 \
@@ -87,11 +83,8 @@ sudo docker run \
  -e REQUEST_DELETE_IN_MINUTE=525600 \
  -e REQUEST_ELAPSED_SEND_ALL_IN_MINUTE=3 \
  -e AVAILABLE_WIFI=CONNECTED \
---rm evitey/evitey-demo:evitey_taskman_new /app/TaskManagement  -reset -seed -migrate &
-DOCKER_PID=$!
-sleep 20
-sudo kill $DOCKER_PID
-wait $DOCKER_PID
+--rm evitey/evitey-demo:evitey_taskman_new /app/TaskManagement -reset -seed -migrate || true
+
 sudo docker run -d --name taskman --restart=always \
  --network deployment_default \
  -e MYSQL_HOST=mysql \
@@ -113,6 +106,7 @@ sudo docker run -d --name taskman --restart=always \
  -e REQUEST_ELAPSED_SEND_ALL_IN_MINUTE=3 \
  -e AVAILABLE_WIFI=CONNECTED \
  evitey/evitey-demo:evitey_taskman_new
+
 sleep 20
 sudo docker run --restart=always --name evitey_fe -d -p 81:80 -p 8443:443 evitey/evitey-demo:evitey_fe_new
 sudo docker network connect deployment_default evitey_fe
@@ -125,7 +119,6 @@ sudo docker ps
 sudo apt-get update
 sudo apt-get install -y certbot python3-certbot-nginx
 sudo certbot certonly --nginx -d test.evitey.com
-
 
 # Comment all lines in the existing Nginx configuration file
 sudo sed -i 's/^/#/' /etc/nginx/sites-available/default
