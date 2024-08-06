@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Domain variable
-DOMAIN="test.evitey.com"
+DOMAIN="48.217.145.18"
 
 # Install requirements
 sudo apt update
