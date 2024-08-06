@@ -8,6 +8,14 @@ sudo apt update
 sudo apt install -y nginx
 curl -sSL https://get.docker.com | sh
 
+# Ensure you are logged in to Azure
+if ! az account show &> /dev/null; then
+  echo "Please run 'az login' to set up your account."
+  az login
+  else
+  echo "Azure login verified."
+fi
+
 # Docker login
 #DOCKER_USERNAME='evitey'
 #DOCKER_PASSWORD='$t@rt2023!'
