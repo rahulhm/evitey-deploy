@@ -1,14 +1,27 @@
 #!/bin/bash
 
+# Domain variable
+DOMAIN="test.evitey.com"
+
 # Install requirements
 sudo apt update
 sudo apt install -y nginx
 curl -sSL https://get.docker.com | sh
 
 # Docker login
-DOCKER_USERNAME='evitey'
-DOCKER_PASSWORD='$t@rt2023!'
+#DOCKER_USERNAME='evitey'
+#DOCKER_PASSWORD='$t@rt2023!'
+#echo "$DOCKER_PASSWORD" | sudo docker login --username "$DOCKER_USERNAME" --password-stdin
+# Set the Azure Key Vault name
+KEY_VAULT_NAME="MindsclikPrivateKeyVault"
+
+# Retrieve Docker credentials from Azure Key Vault
+DOCKER_USERNAME=$(az keyvault secret show --name "DOCKER-USERNAME" --vault-name $KEY_VAULT_NAME --query value -o tsv)
+DOCKER_PASSWORD=$(az keyvault secret show --name "DOCKER-PASSWORD" --vault-name $KEY_VAULT_NAME --query value -o tsv)
+
+# Docker login using credentials from Key Vault
 echo "$DOCKER_PASSWORD" | sudo docker login --username "$DOCKER_USERNAME" --password-stdin
+
 
 # Cleanup Docker containers and images
 sudo docker ps -aq | xargs sudo docker stop | xargs sudo docker rm
@@ -118,16 +131,16 @@ sudo docker ps
 
 sudo apt-get update
 sudo apt-get install -y certbot python3-certbot-nginx
-sudo certbot certonly --nginx -d test.evitey.com
+sudo certbot certonly --nginx -d $DOMAIN
 
 # Comment all lines in the existing Nginx configuration file
 sudo sed -i 's/^/#/' /etc/nginx/sites-available/default
 
 # NGINX configuration outside Docker
-sudo bash -c 'cat << EOF > /etc/nginx/sites-available/default
+sudo bash -c "cat << EOF > /etc/nginx/sites-available/default
 server {
     listen 80;
-    server_name test.evitey.com;
+    server_name $DOMAIN;
     location / {
         return 301 https://\$host\$request_uri;
     }
@@ -135,10 +148,10 @@ server {
 
 server {
     listen 443 ssl;
-    server_name test.evitey.com;
+    server_name $DOMAIN;
 
-    ssl_certificate /etc/letsencrypt/live/test.evitey.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/test.evitey.com/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/$DOMAIN/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/$DOMAIN/privkey.pem;
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers HIGH:!aNULL:!MD5;
 
@@ -150,22 +163,22 @@ server {
         proxy_set_header X-Forwarded-Proto \$scheme;
     }
 }
-EOF'
+EOF"
 
 # Restart NGINX service
 sudo systemctl restart nginx.service
 
 # NGINX configuration inside Docker container
-sudo docker exec -it evitey_fe sh -c 'cat << EOF > /etc/nginx/conf.d/default.conf
+sudo docker exec -it evitey_fe sh -c "cat << EOF > /etc/nginx/conf.d/default.conf
 server {
     listen 81;
-    server_name test.evitey.com;
+    server_name $DOMAIN;
 
     location / {
-        return 301 https://test.evitey.com\$request_uri;
+        return 301 https://$DOMAIN\$request_uri;
     }
 }
-EOF'
+EOF"
 
 # Reload NGINX configuration inside Docker container
 sudo docker exec -it evitey_fe nginx -s reload
