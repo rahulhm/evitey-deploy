@@ -17,15 +17,15 @@ if ! az account show &> /dev/null; then
 fi
 
 # Docker login
-#DOCKER_USERNAME='evitey'
-#DOCKER_PASSWORD='$t@rt2023!'
-#echo "$DOCKER_PASSWORD" | sudo docker login --username "$DOCKER_USERNAME" --password-stdin
+DOCKER_USERNAME='evitey'
+DOCKER_PASSWORD='$t@rt2023!'
+echo "$DOCKER_PASSWORD" | sudo docker login --username "$DOCKER_USERNAME" --password-stdin
 # Set the Azure Key Vault name
-KEY_VAULT_NAME="MindsclikPrivateKeyVault"
+#KEY_VAULT_NAME="MindsclikPrivateKeyVault"
 
 # Retrieve Docker credentials from Azure Key Vault
-DOCKER_USERNAME=$(az keyvault secret show --name "DOCKER-USERNAME" --vault-name $KEY_VAULT_NAME --query value -o tsv)
-DOCKER_PASSWORD=$(az keyvault secret show --name "DOCKER-PASSWORD" --vault-name $KEY_VAULT_NAME --query value -o tsv)
+#DOCKER_USERNAME=$(az keyvault secret show --name "DOCKER-USERNAME" --vault-name $KEY_VAULT_NAME --query value -o tsv)
+#DOCKER_PASSWORD=$(az keyvault secret show --name "DOCKER-PASSWORD" --vault-name $KEY_VAULT_NAME --query value -o tsv)
 
 # Docker login using credentials from Key Vault
 echo "$DOCKER_PASSWORD" | sudo docker login --username "$DOCKER_USERNAME" --password-stdin
