@@ -1,4 +1,4 @@
-name: Sync to ct-mcops-platform
+name: Sync to new code
 
 on:
   push:
