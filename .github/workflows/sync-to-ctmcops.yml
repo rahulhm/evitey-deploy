@@ -1,0 +1,19 @@
+name: Sync to ct-mcops-platform
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout source repository
+      uses: actions/checkout@v3
+
+    - name: Mirror push to target repository
+      run: |
+        git remote add target https://github.com/rahulhm/evitey-deploy.git
+        git push --mirror target
