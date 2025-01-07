@@ -15,5 +15,5 @@ jobs:
 
     - name: Mirror push to target repository
       run: |
-        git remote add target https://github.com/rahulhm/evitey-deploy.git
+        git remote add target git@github.com:rahulhm/evitey-deploy.git
         git push --mirror target
