@@ -14,9 +14,9 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Mirror push to target repository
-      env:
-        GIT_USER: rahulhm
-        GIT_TOKEN: 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
+      #env:
+      #  GIT_USER: rahulhm
+      #  GIT_TOKEN: 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
       run: |
-        git remote add target https://${GIT_USER}:${GIT_TOKEN}@github.com/rahulhm/evitey-deploy.git
+        git remote add target https://rahulhm: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@github.com/rahulhm/evitey-deploy.git
         git push --mirror target
