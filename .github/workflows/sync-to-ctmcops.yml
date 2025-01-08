@@ -25,6 +25,7 @@ jobs:
       #  GIT_USER: rahulhm
       #  GIT_TOKEN: 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
       run: |
+        git clone https://rahulhm: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@github.com/rahulhm/evitey-deploy.git
         cd evitey-deploy
         git remote add target https://rahulhm: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@github.com/rahulhm/evitey-deploy.git
         git push --mirror target
