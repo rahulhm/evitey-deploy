@@ -1,3 +1,4 @@
+#TEST1
 #!/bin/bash
 
 # Set your resource group name and VM name
