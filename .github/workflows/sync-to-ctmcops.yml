@@ -22,7 +22,7 @@ jobs:
     - name: Mirror push to target repository
       #env:
       #  GIT_USER: rahulhm
-      #  GIT_TOKEN: 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
+      #  GIT_TOKEN: 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
       run: |
-        sudo git remote add target https://rahulhm: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@github.com/rahulhm/evitey-deploy.git
-        sudo git push --mirror target
+        git remote add target https://rahulhm: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@github.com/rahulhm/evitey-deploy.git
+        git push --mirror target
